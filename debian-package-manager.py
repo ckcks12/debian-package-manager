@@ -90,8 +90,10 @@ def downloadPackageWithAllDependencies(package):
 
     # check already downloaded
     if checkDB(package):
-        print(package + ' already downloaded')
+        print('* ' + package + ' already downloaded')
         return True
+    else:
+        print('- ' + package + ' will download')
 
     res = req.get('https://packages.debian.org' + package)
     q = pq(res.content)
@@ -110,7 +112,7 @@ def downloadPackageWithAllDependencies(package):
                 break
 
     if link == '':
-        print('cannot resolve ' + package)
+        print('! cannot resolve ' + package)
         return False
 
     res = req.get('https://packages.debian.org' + link)
@@ -123,6 +125,7 @@ def downloadPackageWithAllDependencies(package):
 
     downloadFromUrl(url)
     addDB(package)
+    saveDB()
 
     for d in dependencies:
         downloadPackageWithAllDependencies(d)
@@ -137,13 +140,12 @@ def downloadFromUrl(url):
             for chunk in res.iter_content(1024):
                 f.write(chunk)
 
-    print(os.path.basename(url) + ' download complete')
+    print('+ ' + os.path.basename(url) + ' download complete')
 
 loadDB()
 
 for packageName in packageNames:
     package = searchPackage(packageName)
     downloadPackageWithAllDependencies(package)
-    saveDB() # fucking unkown error may shit this program
 
 print("--- %s seconds ---" % (time.time() - _startTime))
