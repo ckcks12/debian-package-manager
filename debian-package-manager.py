@@ -99,6 +99,17 @@ def downloadPackageWithAllDependencies(package):
     q = pq(res.content)
     dependencies = getDependenciesFromPyQuery(q)
 
+    # virtual package
+    if q('h1:first-of-type').text().startswith('Virtual Package: '):
+        virtualDependencies = getVirtualDependenciesFromPyQuery(q)
+
+        addDB(package)
+        saveDB()
+
+        for d in virtualDependencies:
+            downloadPackageWithAllDependencies(d)
+        return True
+
     link = ''
     tr = q('#pdownload tr')[1:]
     tr1 = pq(pq(tr[0])('a')[0])
@@ -141,6 +152,12 @@ def downloadFromUrl(url):
                 f.write(chunk)
 
     print('+ ' + os.path.basename(url) + ' download complete')
+
+def getVirtualDependenciesFromPyQuery(q):
+    a = q('#pdeps a:first-of-type')
+    # Virtual Package should be only one for each or I will kill the fucking debians.
+    # Official page's definition of virtual package link is broken.
+    return [a.attr('href')]
 
 loadDB()
 
