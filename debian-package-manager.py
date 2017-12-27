@@ -26,7 +26,12 @@ def searchPackage(packageName):
     global architecture
     global codeName
 
-    res = req.get('https://packages.debian.org/search?suite=' + codeName + '&arch=' + architecture + '&searchon=names&keywords=' + packageName)
+    res = req.get('https://packages.debian.org/search', params={
+        'suite': codeName,
+        'arch': architecture,
+        'searchon': 'names',
+        'keywords': packageName
+        })
     q = pq(res.content)
 
     if checkSearchSucceed(q):
