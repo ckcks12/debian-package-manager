@@ -133,10 +133,16 @@ def downloadPackageWithAllDependencies(package):
         if a.text == favoriteMirror:
             url = a.get('href')
             break
+    # no favoriteMirror, first link whatever.
+    if url == '':
+        url = q('#content ul li a:first-of-type').attr('href')
 
-    downloadFromUrl(url)
-    addDB(package)
-    saveDB()
+    try:
+        downloadFromUrl(url)
+        addDB(package)
+        saveDB()
+    except:
+        print('! error occured while downloading ' + package)
 
     for d in dependencies:
         downloadPackageWithAllDependencies(d)
