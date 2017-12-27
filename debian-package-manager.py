@@ -2,10 +2,11 @@ from pyquery import PyQuery as pq
 import requests as req
 import os
 import time
+import sys
 
 _startTime = time.time()
 
-packageNames = ['bash']
+packageNames = sys.argv[1:]
 architecture = 'armhf'
 favoriteMirror = 'ftp.kr.debian.org/debian'
 codeName = 'jessie'
@@ -24,8 +25,8 @@ def checkSearchSucceed(q):
 def searchPackage(packageName):
     global architecture
     global codeName
-    
-    res = req.get('https://packages.debian.org/search?suite=' codeName + '&arch=' + architecture + '&searchon=names&keywords=' + packageName)
+
+    res = req.get('https://packages.debian.org/search?suite=' + codeName + '&arch=' + architecture + '&searchon=names&keywords=' + packageName)
     q = pq(res.content)
 
     if checkSearchSucceed(q):
@@ -55,7 +56,7 @@ def loadDB():
         f = open(DB_PATH, 'r+')
     else:
         f = open(DB_PATH, 'w+')
-    db = f.readlines()
+    db = f.read().splitlines()
     f.close()
 
     # donwload folder
@@ -139,8 +140,10 @@ def downloadFromUrl(url):
     print(os.path.basename(url) + ' download complete')
 
 loadDB()
-package = searchPackage('vim')
-downloadPackageWithAllDependencies(package)
-saveDB()
+
+for packageName in packageNames:
+    package = searchPackage(packageName)
+    downloadPackageWithAllDependencies(package)
+    saveDB() # fucking unkown error may shit this program
 
 print("--- %s seconds ---" % (time.time() - _startTime))
